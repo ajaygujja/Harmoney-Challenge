@@ -42,6 +42,7 @@ class _SearchGifsPageState extends State<SearchGifsPage> {
 
     try {
       context.read<GifCubit>().searchGifs(query);
+      FocusScope.of(context).unfocus();
     } catch (e) {}
   }
 

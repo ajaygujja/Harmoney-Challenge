@@ -26,7 +26,7 @@ class GifView extends StatefulWidget {
   State<GifView> createState() => _GifViewState();
 }
 
-class _GifViewState extends State<GifView>{
+class _GifViewState extends State<GifView> {
   late ScrollController _controller;
 
   @override
@@ -45,54 +45,11 @@ class _GifViewState extends State<GifView>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gifs'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const SearchGifsPage()),
-                );
-              },
-              icon: const Icon(Icons.search)),
-          IconButton(
-              onPressed: () {
-                context.read<ThemeCubit>().toggleTheme();
-              },
-              icon: const Icon(Icons.dark_mode_outlined)),
-        ],
-        elevation: 0,
-      ),
+      appBar: buildAppBar(context),
       body: BlocBuilder<GifCubit, GifState>(
         builder: (context, state) {
           if (state is GifLoaded) {
-            return GridView.builder(
-                controller: _controller,
-                itemCount: state.gifData.length + 1, // for loading indicator
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10),
-                itemBuilder: (context, index) {
-                  if (index >= state.gifData.length) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final imageUrl = state.gifData[index].images?.fixedWidth?.url;
-                  if (imageUrl?.isEmpty ?? true) return const SizedBox();
-
-                  return Container(
-                      // decoration: BoxDecoration(
-                      //   border: Border.all(),
-                      //   borderRadius: BorderRadius.circular(10)
-                      // ),
-                      child: Image.network(
-                    imageUrl!,
-                    fit: BoxFit.fill,
-                  ));
-                });
+            return buildGridView(state);
           }
 
           return const Center(
@@ -100,6 +57,59 @@ class _GifViewState extends State<GifView>{
           );
         },
       ),
+    );
+  }
+
+  GridView buildGridView(GifLoaded state) {
+    return GridView.builder(
+        controller: _controller,
+        itemCount: state.gifData.length + 1, // for loading indicator
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10),
+        itemBuilder: (context, index) {
+          if (index >= state.gifData.length) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final imageUrl = state.gifData[index].images?.fixedWidth?.url;
+          if (imageUrl?.isEmpty ?? true) return const SizedBox();
+
+          return Container(
+              height: 200,
+              decoration: BoxDecoration(
+                // border: Border.all(),
+                borderRadius: BorderRadius.circular(8)
+              ),
+              child: Image.network(
+                imageUrl!,
+                fit: BoxFit.fill,
+                height: 200,
+              ));
+        });
+  }
+
+  AppBar buildAppBar(BuildContext context) {
+    return AppBar(
+      title: const Text('Gifs'),
+      centerTitle: true,
+      actions: [
+        IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(
+                    MaterialPageRoute(
+                        builder: (context) => const SearchGifsPage()),
+                  )
+                  .then((value) => context.read<GifCubit>().getAllGifs());
+            },
+            icon: const Icon(Icons.search)),
+        IconButton(
+            onPressed: () {
+              context.read<ThemeCubit>().toggleTheme();
+            },
+            icon: const Icon(Icons.dark_mode_outlined)),
+      ],
+      elevation: 0,
     );
   }
 
