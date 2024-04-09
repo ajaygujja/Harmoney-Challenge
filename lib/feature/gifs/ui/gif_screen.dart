@@ -22,10 +22,19 @@ class GifView extends StatefulWidget {
 }
 
 class _GifViewState extends State<GifView> {
+  late ScrollController _controller;
+
   @override
   void initState() {
     super.initState();
+    _controller = ScrollController();
     context.read<GifCubit>().getAllGifs();
+
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        context.read<GifCubit>().loadMoreGifs();
+      }
+    });
   }
 
   @override
@@ -39,14 +48,18 @@ class _GifViewState extends State<GifView> {
         builder: (context, state) {
           if (state is GifLoaded) {
             return GridView.builder(
-                itemCount: state.gifData.length,
+              controller: _controller,
+                itemCount: state.gifData.length + 1, // for loading indicator
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: 5,
-                    crossAxisSpacing: 5),
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10),
                 itemBuilder: (context, index) {
-                  final imageUrl =
-                      state.gifData[index].images?.fixedWidth?.url;
+                  if (index >= state.gifData.length) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final imageUrl = state.gifData[index].images?.fixedWidth?.url;
 
                   if (imageUrl?.isEmpty ?? true) return const SizedBox();
 
@@ -55,7 +68,10 @@ class _GifViewState extends State<GifView> {
                       //   border: Border.all(),
                       //   borderRadius: BorderRadius.circular(10)
                       // ),
-                      child: Image.network(imageUrl!, fit: BoxFit.fill,));
+                      child: Image.network(
+                    imageUrl!,
+                    fit: BoxFit.fill,
+                  ));
                 });
           }
 
@@ -65,5 +81,11 @@ class _GifViewState extends State<GifView> {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

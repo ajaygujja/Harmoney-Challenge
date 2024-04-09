@@ -13,6 +13,7 @@ class GifCubit extends Cubit<GifState> {
   Future<void> getAllGifs() async {
     try {
       emit(GifLoading());
+
       final data = {
         'api_key': 'evUuNnrbbOLDUaIlkGmngqwSn6i7N7Am',
         'offset': '0',
@@ -21,9 +22,8 @@ class GifCubit extends Cubit<GifState> {
         'bundle': 'messaging_non_clips'
       };
 
-      final response =
-          await Dio().get('https://api.giphy.com/v1/gifs/trending', queryParameters: data);
-
+      final response = await Dio()
+          .get('https://api.giphy.com/v1/gifs/trending', queryParameters: data);
 
       log('calling api => $response');
 
@@ -36,12 +36,47 @@ class GifCubit extends Cubit<GifState> {
 
         if (parsedData == null || parsedData.data == null) throw Exception();
 
-        emit(GifLoaded(gifData: parsedData.data!));
+        emit(GifLoaded(gifData: parsedData.data!, offset: 25));
       } else {
         emit(GifError());
       }
     } catch (e) {
       emit(GifError());
+    }
+  }
+
+  Future<void> loadMoreGifs() async {
+    var currentState = state;
+    try {
+      if (currentState is GifLoaded) {
+        final data = {
+          'api_key': 'evUuNnrbbOLDUaIlkGmngqwSn6i7N7Am',
+          'offset': currentState.offset + 1,
+          'limit': currentState.limit,
+          'rating': 'g',
+          'bundle': 'messaging_non_clips'
+        };
+
+        final response = await Dio().get(
+            'https://api.giphy.com/v1/gifs/trending',
+            queryParameters: data);
+
+        if (response.statusCode == 200 && response.data != null) {
+          final parsedData = GiphyModel.fromJson(response.data);
+
+          log('parsedData $parsedData');
+
+          if (parsedData == null || parsedData.data == null) throw Exception();
+
+          emit(currentState.copyWith(
+              gifData: currentState.gifData + parsedData.data!,
+              offset: currentState.offset + currentState.limit));
+        } else {
+          emit(currentState);
+        }
+      }
+    } catch (e) {
+      emit(currentState);
     }
   }
 }
