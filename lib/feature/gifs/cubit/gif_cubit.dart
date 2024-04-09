@@ -79,4 +79,40 @@ class GifCubit extends Cubit<GifState> {
       emit(currentState);
     }
   }
+
+  Future<void> searchGifs(String query) async {
+    try {
+      log('query $query');
+
+
+      emit(GifSearching());
+
+      final data = {
+        'api_key': 'evUuNnrbbOLDUaIlkGmngqwSn6i7N7Am',
+        'q': query,
+        'lang': 'en',
+        'offset': '0',
+        'limit': '25',
+        'rating': 'g',
+        'bundle': 'messaging_non_clips'
+      };
+
+      final response = await Dio()
+          .get('https://api.giphy.com/v1/gifs/search', queryParameters: data);
+
+      log('calling api => $response');
+
+      if (response.statusCode == 200 && response.data != null) {
+        final parsedData = GiphyModel.fromJson(response.data);
+
+        log('parsedData $parsedData');
+
+        if (parsedData == null || parsedData.data == null) throw Exception();
+
+        emit(GifSearchCompleted(gifData: parsedData.data!));
+      }
+    } catch (e) {
+      emit(GifSearchError());
+    }
+  }
 }

@@ -40,3 +40,22 @@ final class GifError extends GifState {
   @override
   List<Object?> get props => [];
 }
+
+final class GifSearching extends GifState {
+  @override
+  List<Object?> get props => [];
+}
+
+final class GifSearchCompleted extends GifState {
+  final List<GiphyData> gifData;
+
+  const GifSearchCompleted({required this.gifData});
+
+  @override
+  List<Object?> get props => [gifData];
+}
+
+final class GifSearchError extends GifState {
+  @override
+  List<Object?> get props => [];
+}

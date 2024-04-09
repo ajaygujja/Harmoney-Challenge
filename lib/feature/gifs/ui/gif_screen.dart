@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:harmoney_challenge/feature/gifs/cubit/gif_cubit.dart';
+import 'package:harmoney_challenge/feature/gifs/ui/search_page.dart';
 
 class GifScreen extends StatelessWidget {
   const GifScreen({super.key});
@@ -42,13 +43,32 @@ class _GifViewState extends State<GifView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gifs'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const SearchGifsPage()),
+                );
+              },
+              icon: const Icon(Icons.search)),
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const SearchGifsPage()),
+                );
+              },
+              icon: const Icon(Icons.dark_mode_outlined)),
+        ],
         elevation: 0,
       ),
       body: BlocBuilder<GifCubit, GifState>(
         builder: (context, state) {
           if (state is GifLoaded) {
             return GridView.builder(
-              controller: _controller,
+                controller: _controller,
                 itemCount: state.gifData.length + 1, // for loading indicator
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -60,7 +80,6 @@ class _GifViewState extends State<GifView> {
                   }
 
                   final imageUrl = state.gifData[index].images?.fixedWidth?.url;
-
                   if (imageUrl?.isEmpty ?? true) return const SizedBox();
 
                   return Container(
