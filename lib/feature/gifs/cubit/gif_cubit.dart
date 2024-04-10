@@ -15,7 +15,7 @@ class GifCubit extends Cubit<GifState> {
       emit(GifLoading());
 
       final data = {
-        'api_key': 'evUuNnrbbOLDUaIlkGmngqwSn6i7N7Am',
+        'api_key': 'evUuNnrbbOLDUaIlkGmngqwSn6i7N7Am', // String.fromEnvironment(api_key) for dart - define
         'offset': '0',
         'limit': '25',
         'rating': 'g',
